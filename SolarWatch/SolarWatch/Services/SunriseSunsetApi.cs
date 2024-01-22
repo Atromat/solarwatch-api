@@ -13,7 +13,7 @@ public class SunriseSunsetApi : ISunsetSunriseDataProvider
 
     public string GetDataByLongitudeLatitude(double latitude, double longitude)
     {
-        var url = $"https://api.sunrise-sunset.org/json?lat={latitude}&lng={longitude}";
+        var url = $"https://api.sunrise-sunset.org/json?lat={latitude}&lng={longitude}&formatted=0";
 
         var client = new WebClient();
 
