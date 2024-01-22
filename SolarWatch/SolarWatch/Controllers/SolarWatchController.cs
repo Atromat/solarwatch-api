@@ -7,13 +7,13 @@ namespace SolarWatch.Controllers;
 [Route("[controller]")]
 public class SolarWatchController : ControllerBase
 {
-    private readonly ILogger<WeatherForecastController> _logger;
+    private readonly ILogger<SolarWatchController> _logger;
     private readonly IJsonProcessor _jsonProcessor;
     private readonly ICoordDataProvider _coordDataProvider;
     private readonly ISunsetSunriseDataProvider _sunsetSunriseDataProvider;
     private readonly ISunsetSunriseJsonProcessor _sunsetSunriseJsonProcessor;
 
-    public SolarWatchController(ILogger<WeatherForecastController> logger, IJsonProcessor jsonProcessor, 
+    public SolarWatchController(ILogger<SolarWatchController> logger, IJsonProcessor jsonProcessor, 
         ICoordDataProvider coordDataProvider, ISunsetSunriseDataProvider sunsetSunriseDataProvider,
         ISunsetSunriseJsonProcessor sunsetSunriseJsonProcessor)
     {
