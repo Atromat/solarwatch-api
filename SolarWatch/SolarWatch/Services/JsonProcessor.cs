@@ -10,9 +10,6 @@ public class JsonProcessor : IJsonProcessor
         var firstJsonElement = json.RootElement.EnumerateArray().ToArray().First();
         var latitude = firstJsonElement.GetProperty("lat").GetDouble();
         var longitude = firstJsonElement.GetProperty("lon").GetDouble();
-        
-        Console.WriteLine(latitude);
-        Console.WriteLine(longitude);
 
         return (latitude, longitude);
     }
