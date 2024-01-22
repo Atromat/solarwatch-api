@@ -2,7 +2,7 @@ using System.Text.Json;
 
 namespace SolarWatch.Services;
 
-public class SunsetSunriseJsonProcessor
+public class SunsetSunriseJsonProcessor : ISunsetSunriseJsonProcessor
 {
     public TimeOnly GetSunrise(string sunsetSunriseData)
     {
