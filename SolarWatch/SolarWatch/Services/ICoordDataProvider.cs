@@ -2,5 +2,5 @@ namespace SolarWatch.Services;
 
 public interface ICoordDataProvider
 {
-    string GetDataByCity(string cityName);
+    Task<string> GetDataByCity(string cityName);
 }
