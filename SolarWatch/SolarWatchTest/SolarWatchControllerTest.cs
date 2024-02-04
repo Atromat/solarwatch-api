@@ -28,14 +28,14 @@ public class SolarWatchControllerTest
     }
 
     [Test]
-    public void GetSunriseTimeNotFoundResultIfSunsetSunriseDataProviderFails()
+    public async Task GetSunriseTimeNotFoundResultIfSunsetSunriseDataProviderFails()
     {
         _sunsetSunriseDataProviderMock.Setup(
             x => x.GetDataByLongitudeLatitude(It.IsAny<double>(), It.IsAny<double>()))
             .Throws(new Exception());
 
         #region _coordDataProviderMockRegion
-        _coordDataProviderMock.Setup(x => x.GetDataByCity(It.IsAny<string>())).Returns(@"
+        _coordDataProviderMock.Setup(x => x.GetDataByCity(It.IsAny<string>())).ReturnsAsync(@"
         [
             {
                 ""name"": ""Budapest"",
@@ -127,21 +127,21 @@ public class SolarWatchControllerTest
 
         _sunsetSunriseJsonProcessor.Setup(x => x.GetSunrise(It.IsAny<string>())).Returns(new TimeOnly(1, 1));
 
-        var result = _controller.GetSunriseTime("sdfsfs");
+        var result = await _controller.GetSunriseTime("sdfsfs");
         Console.WriteLine(result.Result);
         
         Assert.IsInstanceOf(typeof(NotFoundObjectResult), result.Result);
     }
     
         [Test]
-    public void GetSunsetTimeNotFoundResultIfSunsetSunriseDataProviderFails()
+    public async Task GetSunsetTimeNotFoundResultIfSunsetSunriseDataProviderFails()
     {
         _sunsetSunriseDataProviderMock.Setup(
             x => x.GetDataByLongitudeLatitude(It.IsAny<double>(), It.IsAny<double>()))
             .Throws(new Exception());
 
         #region _coordDataProviderMockRegion
-        _coordDataProviderMock.Setup(x => x.GetDataByCity(It.IsAny<string>())).Returns(@"
+        _coordDataProviderMock.Setup(x => x.GetDataByCity(It.IsAny<string>())).ReturnsAsync(@"
         [
             {
                 ""name"": ""Budapest"",
@@ -233,14 +233,14 @@ public class SolarWatchControllerTest
 
         _sunsetSunriseJsonProcessor.Setup(x => x.GetSunset(It.IsAny<string>())).Returns(new TimeOnly(1, 1));
 
-        var result = _controller.GetSunsetTime("sdfsfs");
+        var result = await _controller.GetSunsetTime("sdfsfs");
         Console.WriteLine(result.Result);
         
         Assert.IsInstanceOf(typeof(NotFoundObjectResult), result.Result);
     }
     
         [Test]
-    public void GetSunriseTimeNotFoundResultIfCoordDataProviderFails()
+    public async Task GetSunriseTimeNotFoundResultIfCoordDataProviderFails()
     {
         _sunsetSunriseDataProviderMock.Setup(
             x => x.GetDataByLongitudeLatitude(It.IsAny<double>(), It.IsAny<double>()))
@@ -269,7 +269,7 @@ public class SolarWatchControllerTest
 
         _sunsetSunriseJsonProcessor.Setup(x => x.GetSunrise(It.IsAny<string>())).Returns(new TimeOnly(1, 1));
 
-        var result = _controller.GetSunriseTime("sdfsfs");
+        var result = await _controller.GetSunriseTime("sdfsfs");
         Console.WriteLine(result.Result);
         
         Assert.IsInstanceOf(typeof(NotFoundObjectResult), result.Result);
