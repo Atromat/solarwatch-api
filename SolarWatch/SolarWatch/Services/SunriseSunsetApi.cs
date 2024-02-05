@@ -11,13 +11,14 @@ public class SunriseSunsetApi : ISunsetSunriseDataProvider
         _logger = logger;
     }
 
-    public string GetDataByLongitudeLatitude(double latitude, double longitude)
+    public async Task<string> GetDataByLongitudeLatitude(double latitude, double longitude)
     {
         var url = $"https://api.sunrise-sunset.org/json?lat={latitude}&lng={longitude}&formatted=0";
 
-        var client = new WebClient();
+        var client = new HttpClient();
 
         _logger.LogInformation("Calling sunrise-sunset.org API with url: {url}", url);
-        return client.DownloadString(url);
+        var response = await client.GetAsync(url);
+        return await response.Content.ReadAsStringAsync();
     }
 }
