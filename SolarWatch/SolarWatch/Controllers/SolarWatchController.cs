@@ -19,7 +19,7 @@ public class SolarWatchController : ControllerBase
 
     public SolarWatchController(
         ILogger<SolarWatchController> logger, 
-        IWeatherMapJsonProcessor weatherMapJsonProcessor, 
+        IWeatherMapJsonProcessor weatherMapJsonProcessor,
         ICityDataProvider cityDataProvider, 
         ISunsetSunriseDataProvider sunsetSunriseDataProvider,
         ISunsetSunriseJsonProcessor sunsetSunriseJsonProcessor,
