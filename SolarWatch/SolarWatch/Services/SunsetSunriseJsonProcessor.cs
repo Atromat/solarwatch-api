@@ -30,4 +30,33 @@ public class SunsetSunriseJsonProcessor : ISunsetSunriseJsonProcessor
 
         return new TimeOnly(hours,minutes,seconds);
     }
+
+    private static DateTime GetDateTime(string dateAndTime)
+    {
+        var timeOnly = GetTimeOnlyFromSunsetSunriseString(dateAndTime);
+
+        var dateOnlyString = string.Concat(dateAndTime.TakeWhile(c => c != 'T'));
+        var splitDate = dateOnlyString.Split("-");
+        var years = Int32.Parse(splitDate[0]);
+        var months = Int32.Parse(splitDate[1]);
+        var days = Int32.Parse(splitDate[2]);
+
+        return new DateTime(years, months, days, timeOnly.Hour, timeOnly.Minute, timeOnly.Second);
+    }
+    
+    public DateTime GetSunriseDateTime(string sunsetSunriseData)
+    {
+        JsonDocument json = JsonDocument.Parse(sunsetSunriseData);
+        var sunrise = json.RootElement.GetProperty("results").GetProperty("sunrise").ToString();
+
+        return GetDateTime(sunrise);
+    }
+
+    public DateTime GetSunsetDateTime(string sunsetSunriseData)
+    {
+        JsonDocument json = JsonDocument.Parse(sunsetSunriseData);
+        var sunset = json.RootElement.GetProperty("results").GetProperty("sunset").ToString();
+
+        return GetDateTime(sunset);
+    }
 }
