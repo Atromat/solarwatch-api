@@ -1,6 +1,6 @@
 namespace SolarWatch.Services;
 
-public interface ICoordDataProvider
+public interface ICityDataProvider
 {
     Task<string> GetDataByCity(string cityName);
 }

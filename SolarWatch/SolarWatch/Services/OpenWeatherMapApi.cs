@@ -2,7 +2,7 @@ using System.Net;
 
 namespace SolarWatch.Services;
 
-public class OpenWeatherMapApi : ICoordDataProvider
+public class OpenWeatherMapApi : ICityDataProvider
 {
     private readonly ILogger<OpenWeatherMapApi> _logger;
     

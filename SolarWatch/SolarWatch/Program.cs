@@ -9,7 +9,7 @@ builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
-builder.Services.AddSingleton<ICoordDataProvider, OpenWeatherMapApi>();
+builder.Services.AddSingleton<ICityDataProvider, OpenWeatherMapApi>();
 builder.Services.AddSingleton<IWeatherMapJsonProcessor, WeatherMapWeatherMapJsonProcessor>();
 builder.Services.AddSingleton<ISunsetSunriseDataProvider, SunriseSunsetApi>();
 builder.Services.AddSingleton<ISunsetSunriseJsonProcessor, SunsetSunriseJsonProcessor>();
