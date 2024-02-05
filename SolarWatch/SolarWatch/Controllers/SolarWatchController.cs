@@ -1,5 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
+using SolarWatch.Model;
 using SolarWatch.Services;
+using SolarWatch.Services.Repositories;
 
 namespace SolarWatch.Controllers;
 
@@ -8,20 +10,29 @@ namespace SolarWatch.Controllers;
 public class SolarWatchController : ControllerBase
 {
     private readonly ILogger<SolarWatchController> _logger;
-    private readonly IJsonProcessor _jsonProcessor;
-    private readonly ICoordDataProvider _coordDataProvider;
+    private readonly IWeatherMapJsonProcessor _weatherMapJsonProcessor;
+    private readonly ICityDataProvider _cityDataProvider;
     private readonly ISunsetSunriseDataProvider _sunsetSunriseDataProvider;
     private readonly ISunsetSunriseJsonProcessor _sunsetSunriseJsonProcessor;
+    private readonly ICityRepository _cityRepository;
+    private readonly ISunriseSunsetRepository _sunriseSunsetRepository;
 
-    public SolarWatchController(ILogger<SolarWatchController> logger, IJsonProcessor jsonProcessor, 
-        ICoordDataProvider coordDataProvider, ISunsetSunriseDataProvider sunsetSunriseDataProvider,
-        ISunsetSunriseJsonProcessor sunsetSunriseJsonProcessor)
+    public SolarWatchController(
+        ILogger<SolarWatchController> logger, 
+        IWeatherMapJsonProcessor weatherMapJsonProcessor, 
+        ICityDataProvider cityDataProvider, 
+        ISunsetSunriseDataProvider sunsetSunriseDataProvider,
+        ISunsetSunriseJsonProcessor sunsetSunriseJsonProcessor,
+        ICityRepository cityRepository,
+        ISunriseSunsetRepository sunriseSunsetRepository)
     {
         _logger = logger;
-        _jsonProcessor = jsonProcessor;
-        _coordDataProvider = coordDataProvider;
+        _weatherMapJsonProcessor = weatherMapJsonProcessor;
+        _cityDataProvider = cityDataProvider;
         _sunsetSunriseDataProvider = sunsetSunriseDataProvider;
         _sunsetSunriseJsonProcessor = sunsetSunriseJsonProcessor;
+        _cityRepository = cityRepository;
+        _sunriseSunsetRepository = sunriseSunsetRepository;
     }
 
     [HttpGet("GetSunriseTime")]
@@ -29,8 +40,8 @@ public class SolarWatchController : ControllerBase
     {
         try
         {
-            var cityData = await _coordDataProvider.GetDataByCity(cityName);
-            var cityLatLon = _jsonProcessor.GetLongitudeLatitude(cityData);
+            var cityData = await _cityDataProvider.GetDataByCity(cityName);
+            var cityLatLon = _weatherMapJsonProcessor.GetLongitudeLatitude(cityData);
             var sunriseData = _sunsetSunriseDataProvider.GetDataByLongitudeLatitude(cityLatLon.Item1, cityLatLon.Item2);
             var sunriseTime = _sunsetSunriseJsonProcessor.GetSunrise(sunriseData);
             return Ok(sunriseTime);
@@ -47,8 +58,8 @@ public class SolarWatchController : ControllerBase
     {
         try
         {
-            var cityData = await _coordDataProvider.GetDataByCity(cityName);
-            var cityLatLon = _jsonProcessor.GetLongitudeLatitude(cityData);
+            var cityData = await _cityDataProvider.GetDataByCity(cityName);
+            var cityLatLon = _weatherMapJsonProcessor.GetLongitudeLatitude(cityData);
             var sunsetData = _sunsetSunriseDataProvider.GetDataByLongitudeLatitude(cityLatLon.Item1, cityLatLon.Item2);
             var sunsetTime = _sunsetSunriseJsonProcessor.GetSunset(sunsetData);
             return Ok(sunsetTime);
@@ -58,5 +69,58 @@ public class SolarWatchController : ControllerBase
             _logger.LogError(e, "Error getting sun rise data");
             return NotFound("Error getting sun rise data");
         }
+    }
+    
+    [HttpGet("GetSunriseSunset")]
+    public async Task<ActionResult<SunriseSunset>> GetSunriseSunset(string cityName, int year, int month, int day)
+    {
+        try
+        {
+            City? city = _cityRepository.GetByName(cityName);
+            
+            if (city != null)
+            {
+                SunriseSunset? sunriseSunset = _sunriseSunsetRepository.GetByNameAndDate(cityName, new DateOnly(year, month, day));
+                
+                if (sunriseSunset == null)
+                {
+                    var sunriseSunsetFromApi = await GetSunriseSunset(city);
+                    _sunriseSunsetRepository.Add(sunriseSunsetFromApi);
+                    return Ok(sunriseSunsetFromApi);
+                }
+                
+                return Ok(sunriseSunset);
+            }
+
+            var sunriseSunsetFromBothApi = await GetSunriseSunset(cityName);
+            //var sunriseSunsetFromApi = new SunriseSunset(); //hiba lenne miért??
+            
+            return Ok(sunriseSunsetFromBothApi);
+        }
+        catch (Exception e)
+        {
+            _logger.LogError(e, "Error getting sunrise/sunset data");
+            return NotFound("Error getting sunrise/sunset data");
+        }
+    }
+
+    private async Task<SunriseSunset> GetSunriseSunset(City city)
+    {
+        var cityData = await _cityDataProvider.GetDataByCity(city.Name);
+        var cityLatLon = _weatherMapJsonProcessor.GetLongitudeLatitude(cityData);
+        var sunriseSunsetData = _sunsetSunriseDataProvider.GetDataByLongitudeLatitude(cityLatLon.Item1, cityLatLon.Item2);
+        var sunriseDateTime = _sunsetSunriseJsonProcessor.GetSunriseDateTime(sunriseSunsetData);
+        var sunsetDateTime = _sunsetSunriseJsonProcessor.GetSunsetDateTime(sunriseSunsetData);
+        var dayLength = _sunsetSunriseJsonProcessor.GetDayLength(sunriseSunsetData);
+        
+        return new SunriseSunset{City = city, Sunrise = sunriseDateTime, Sunset = sunsetDateTime, DayLength = dayLength};
+    }
+    
+    private async Task<SunriseSunset> GetSunriseSunset(string cityName)
+    {
+        var cityData = await _cityDataProvider.GetDataByCity(cityName);
+        var city = _weatherMapJsonProcessor.GetCity(cityData);
+        
+        return await GetSunriseSunset(city);
     }
 }
