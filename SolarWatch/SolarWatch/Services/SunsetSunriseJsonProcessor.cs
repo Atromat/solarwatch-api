@@ -59,4 +59,10 @@ public class SunsetSunriseJsonProcessor : ISunsetSunriseJsonProcessor
 
         return GetDateTime(sunset);
     }
+
+    public int GetDayLength(string sunriseSunsetData)
+    {
+        JsonDocument json = JsonDocument.Parse(sunriseSunsetData);
+        return json.RootElement.GetProperty("results").GetProperty("day_length").GetInt32();
+    }
 }
