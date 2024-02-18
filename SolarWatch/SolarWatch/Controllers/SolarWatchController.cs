@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using SolarWatch.Model;
 using SolarWatch.Services;
@@ -102,8 +103,8 @@ public class SolarWatchController : ControllerBase
         }
         catch (Exception e)
         {
-            _logger.LogError(e, "Error getting sunrise/sunset data");
-            return NotFound("Error getting sunrise/sunset data");
+            _logger.LogError(e, "Error getting SunriseSunset data");
+            return NotFound("Error getting SunriseSunset data");
         }
     }
 
@@ -129,5 +130,131 @@ public class SolarWatchController : ControllerBase
     {
         var cityData = await _cityDataProvider.GetDataByCity(cityName);
         return _weatherMapJsonProcessor.GetCity(cityData);
+    }
+    
+    [HttpPost("PostSunriseSunset"), Authorize(Roles="Admin")]
+    public async Task<ActionResult<SunriseSunset>> PostSunriseSunset(string cityName, 
+        int sunriseYear, int sunriseMonth, int sunriseDay, int sunriseHour, int sunriseMinute, int sunriseSecond,
+        int sunsetYear, int sunsetMonth, int sunsetDay, int sunsetHour, int sunsetMinute, int sunsetSecond,
+        int dayLength)
+    {
+        try
+        {
+            City? city = _cityRepository.GetByName(cityName);
+            
+            if (city != null)
+            {
+                var sunriseSunset = new SunriseSunset
+                {
+                    City = city,
+                    Sunrise = new DateTime(sunriseYear, sunriseMonth, sunriseDay, sunriseHour, sunriseMinute, sunriseSecond),
+                    Sunset = new DateTime(sunsetYear, sunsetMonth, sunsetDay, sunsetHour, sunsetMinute, sunsetSecond),
+                    DayLength = dayLength
+                };
+                
+                _sunriseSunsetRepository.Add(sunriseSunset);
+                
+                return Ok("Successfully added SunriseSunset.");
+            }
+
+            var cityFromApi = await GetCity(cityName);
+            _cityRepository.Add(cityFromApi);
+            
+            var sunriseSunsetForDb = new SunriseSunset
+            {
+                City = cityFromApi,
+                Sunrise = new DateTime(sunriseYear, sunriseMonth, sunriseDay, sunriseHour, sunriseMinute, sunriseSecond),
+                Sunset = new DateTime(sunsetYear, sunsetMonth, sunsetDay, sunsetHour, sunsetMinute, sunsetSecond),
+                DayLength = dayLength
+            };
+            
+            _sunriseSunsetRepository.Add(sunriseSunsetForDb);
+            
+            return Ok("Successfully added SunriseSunset.");
+        }
+        catch (Exception e)
+        {
+            _logger.LogError(e, "Error posting SunriseSunset data");
+            return StatusCode(500, "Error posting SunriseSunset data");
+        }
+    }
+    
+    [HttpPatch("UpdateSunriseSunset"), Authorize(Roles="Admin")]
+    public async Task<ActionResult<SunriseSunset>> UpdateSunriseSunset(int id, string cityName, 
+        int sunriseYear, int sunriseMonth, int sunriseDay, int sunriseHour, int sunriseMinute, int sunriseSecond,
+        int sunsetYear, int sunsetMonth, int sunsetDay, int sunsetHour, int sunsetMinute, int sunsetsSecond,
+        int dayLength)
+    {
+        try
+        {
+            City? city = _cityRepository.GetByName(cityName);
+
+            SunriseSunset? sunriseSunsetFromDb = _sunriseSunsetRepository.GetById(id);
+
+            if (sunriseSunsetFromDb == null)
+            {
+                return NotFound($"Couldn't update SunriseSunset by id {id} because it doesn't exist.");
+            }
+            
+            if (city != null)
+            {
+                var sunriseSunset = new SunriseSunset
+                {
+                    Id = id,
+                    City = city,
+                    Sunrise = new DateTime(sunriseYear, sunriseMonth, sunriseDay, sunriseHour, sunriseMinute, sunriseSecond),
+                    Sunset = new DateTime(sunsetYear, sunsetMonth, sunsetDay, sunsetHour, sunsetMinute, sunsetsSecond),
+                    DayLength = dayLength
+                };
+                
+                _sunriseSunsetRepository.Update(sunriseSunset);
+                
+                return Ok("Successfully updated SunriseSunset.");
+            }
+
+            var cityFromApi = await GetCity(cityName);
+            _cityRepository.Add(cityFromApi);
+            
+            var sunriseSunsetForDb = new SunriseSunset
+            {
+                Id = id,
+                City = cityFromApi,
+                Sunrise = new DateTime(sunriseYear, sunriseMonth, sunriseDay, sunriseHour, sunriseMinute, sunriseSecond),
+                Sunset = new DateTime(sunsetYear, sunsetMonth, sunsetDay, sunsetHour, sunsetMinute, sunsetsSecond),
+                DayLength = dayLength
+            };
+            
+            _sunriseSunsetRepository.Update(sunriseSunsetForDb);
+            
+            return Ok("Successfully updated SunriseSunset.");
+        }
+        catch (Exception e)
+        {
+            _logger.LogError(e, "Error updating SunriseSunset data");
+            return StatusCode(500, "Error updating SunriseSunset data");
+        }
+    }
+    
+    [HttpDelete("DeleteSunriseSunset"), Authorize(Roles="Admin")]
+    public async Task<ActionResult<SunriseSunset>> DeleteSunriseSunset(int id)
+    {
+        try
+        {
+            SunriseSunset? sunriseSunsetFromDb = _sunriseSunsetRepository.GetById(id);
+
+            if (sunriseSunsetFromDb == null)
+            {
+                return NotFound($"Couldn't delete SunriseSunset by id {id} because it doesn't exist.");
+            }
+            
+            _sunriseSunsetRepository.Delete(id);
+            
+            return Ok("Successfully deleted SunriseSunset.");
+        }
+        catch (Exception e)
+        {
+            _logger.LogError(e, "Error deleting SunriseSunset data");
+            return StatusCode(500, "Error deleting SunriseSunset data");
+        }
     }
 }

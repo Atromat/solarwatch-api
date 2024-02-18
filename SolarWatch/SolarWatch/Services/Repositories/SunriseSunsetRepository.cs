@@ -11,6 +11,12 @@ public class SunriseSunsetRepository : ISunriseSunsetRepository
         return dbContext.SunriseSunsets.ToList();
     }
 
+    public SunriseSunset? GetById(int id)
+    {
+        using var dbContext = new SolarWatchContext();
+        return dbContext.SunriseSunsets.FirstOrDefault(s => s.Id == id);
+    }
+    
     public SunriseSunset? GetByName(string cityName)
     {
         using var dbContext = new SolarWatchContext();
@@ -40,9 +46,10 @@ public class SunriseSunsetRepository : ISunriseSunsetRepository
         dbContext.SaveChanges();
     }
 
-    public void Delete(SunriseSunset sunriseSunset)
+    public void Delete(int id)
     {
         using var dbContext = new SolarWatchContext();
+        var sunriseSunset = dbContext.SunriseSunsets.First(s => s.Id == id);
         dbContext.Remove(sunriseSunset);
         dbContext.SaveChanges();
     }
