@@ -71,7 +71,7 @@ public class SolarWatchController : ControllerBase
         }
     }
     
-    [HttpGet("GetSunriseSunset")]
+    [HttpGet("GetSunriseSunset"), Authorize(Roles="User, Admin")]
     public async Task<ActionResult<SunriseSunset>> GetSunriseSunset(string cityName, int year, int month, int day)
     {
         try
