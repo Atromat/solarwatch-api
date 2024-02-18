@@ -14,7 +14,7 @@ public class SunriseSunsetRepository : ISunriseSunsetRepository
     public SunriseSunset? GetByName(string cityName)
     {
         using var dbContext = new SolarWatchContext();
-        return dbContext.SunriseSunsets.FirstOrDefault(c => c.City.Name == cityName);
+        return dbContext.SunriseSunsets.FirstOrDefault(s => s.City.Name == cityName);
     }
     
     public SunriseSunset? GetByNameAndDate(string cityName, DateTime dateTime)
