@@ -5,8 +5,8 @@ using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using SolarWatch.Services;
 using SolarWatch.Services.Repositories;
-using WeatherApi.Data;
-using WeatherApi.Services.Authentication;
+using SolarWatch.Data;
+using SolarWatch.Services.Authentication;
 
 var builder = WebApplication.CreateBuilder(args);
 

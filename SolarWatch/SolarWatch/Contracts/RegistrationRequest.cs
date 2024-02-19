@@ -1,6 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 
-namespace WeatherApi.Contracts;
+namespace SolarWatch.Contracts;
 
 public record RegistrationRequest(
     [Required]string Email, 

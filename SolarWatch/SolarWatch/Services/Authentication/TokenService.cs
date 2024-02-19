@@ -5,7 +5,7 @@ using System.Text;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.IdentityModel.Tokens;
 
-namespace WeatherApi.Services.Authentication;
+namespace SolarWatch.Services.Authentication;
 
 public class TokenService : ITokenService
 {

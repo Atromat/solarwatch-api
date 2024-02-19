@@ -1,4 +1,4 @@
-namespace WeatherApi.Contracts;
+namespace SolarWatch.Contracts;
 
 public record RegistrationResponse(
     string Email, 

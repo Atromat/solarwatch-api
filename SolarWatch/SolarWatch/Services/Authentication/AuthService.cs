@@ -1,6 +1,6 @@
 using Microsoft.AspNetCore.Identity;
 
-namespace WeatherApi.Services.Authentication;
+namespace SolarWatch.Services.Authentication;
 
 public class AuthService : IAuthService
 {

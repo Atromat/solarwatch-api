@@ -1,8 +1,8 @@
 using Microsoft.AspNetCore.Mvc;
-using WeatherApi.Contracts;
-using WeatherApi.Services.Authentication;
+using SolarWatch.Contracts;
+using SolarWatch.Services.Authentication;
 
-namespace WeatherApi.Controllers;
+namespace SolarWatch.Controllers;
 
 [ApiController]
 [Route("[controller]")]
