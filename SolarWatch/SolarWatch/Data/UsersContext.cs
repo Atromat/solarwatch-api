@@ -12,8 +12,13 @@ public class UsersContext : IdentityDbContext<IdentityUser, IdentityRole, string
     
     protected override void OnConfiguring(DbContextOptionsBuilder options)
     {
-        // It would be a good idea to move the connection string to user secrets
-        options.UseSqlServer("Server=localhost,1433;Database=SolarWatchApi;User Id=sa;Password=hgUrjkl8in12;Encrypt=false;");
+        var configuration = new ConfigurationBuilder()
+            .SetBasePath(AppDomain.CurrentDomain.BaseDirectory)
+            .AddJsonFile("appsettings.json", optional: true, reloadOnChange: true)
+            .Build();
+        
+        options.UseSqlServer(
+            configuration.GetConnectionString("SolarWatchDBLocalConnection"));
 
     }
     protected override void OnModelCreating(ModelBuilder modelBuilder)

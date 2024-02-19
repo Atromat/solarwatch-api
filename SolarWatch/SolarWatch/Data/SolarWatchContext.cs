@@ -10,8 +10,13 @@ public class SolarWatchContext : DbContext
     
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
     {
+        var configuration = new ConfigurationBuilder()
+            .SetBasePath(AppDomain.CurrentDomain.BaseDirectory)
+            .AddJsonFile("appsettings.json", optional: true, reloadOnChange: true)
+            .Build();
+        
         optionsBuilder.UseSqlServer(
-            "Server=localhost,1433;Database=SolarWatchApi;User Id=sa;Password=hgUrjkl8in12;Encrypt=false;");
+            configuration.GetConnectionString("SolarWatchDBLocalConnection"));
     }
     
     protected override void OnModelCreating(ModelBuilder builder)
