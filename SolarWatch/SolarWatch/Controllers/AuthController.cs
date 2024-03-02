@@ -58,7 +58,7 @@ public class AuthController : ControllerBase
             return BadRequest(ModelState);
         }
         
-        Response.Cookies.Append("User", result.Token, new CookieOptions() { HttpOnly = true, SameSite = SameSiteMode.Strict });
+        Response.Cookies.Append("token", result.Token, new CookieOptions() { HttpOnly = true, SameSite = SameSiteMode.Strict });
 
         return Ok(new AuthResponse(result.Email, result.UserName, result.Token));
     }
