@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using SolarWatch.Contracts;
 using SolarWatch.Services.Authentication;
@@ -61,5 +62,13 @@ public class AuthController : ControllerBase
         Response.Cookies.Append("token", result.Token, new CookieOptions() { HttpOnly = true, SameSite = SameSiteMode.Strict });
 
         return Ok(new AuthResponse(result.Email, result.UserName, result.Token));
+    }
+    
+    [Authorize(Roles = "User, Admin")]
+    [HttpPost("Logout")]
+    public IActionResult Logout()
+    {
+        HttpContext.Response.Cookies.Delete("token");
+        return Ok();
     }
 }
