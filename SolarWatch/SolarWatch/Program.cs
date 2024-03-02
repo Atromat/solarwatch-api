@@ -119,6 +119,15 @@ void AddAuthentication()
                     Encoding.UTF8.GetBytes("!SomethingSecret!!SomethingSecret!")
                 ),
             };
+            
+            options.Events = new JwtBearerEvents()
+            {
+                OnMessageReceived = context =>
+                {
+                    context.Token = context.Request.Cookies["User"];
+                    return Task.CompletedTask;
+                }
+            };
         });
     
     builder.Services.AddScoped<IAuthService, AuthService>();
