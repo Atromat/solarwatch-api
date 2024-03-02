@@ -85,7 +85,7 @@ public class SolarWatchController : ControllerBase
                 
                 if (sunriseSunset == null)
                 {
-                    var sunriseSunsetFromApi = await GetSunriseSunset(city);
+                    var sunriseSunsetFromApi = await GetSunriseSunsetByCityAndDate(city, year, month, day);
                     _sunriseSunsetRepository.Add(sunriseSunsetFromApi);
                     return Ok(sunriseSunsetFromApi);
                 }
@@ -111,6 +111,17 @@ public class SolarWatchController : ControllerBase
     private async Task<SunriseSunset> GetSunriseSunset(City city)
     {
         var sunriseSunsetData = await _sunsetSunriseDataProvider.GetDataByLongitudeLatitude(city.Latitude, city.Longitude);
+        var sunriseDateTime = _sunsetSunriseJsonProcessor.GetSunriseDateTime(sunriseSunsetData);
+        var sunsetDateTime = _sunsetSunriseJsonProcessor.GetSunsetDateTime(sunriseSunsetData);
+        var dayLength = _sunsetSunriseJsonProcessor.GetDayLength(sunriseSunsetData);
+        
+        return new SunriseSunset{City = city, Sunrise = sunriseDateTime, Sunset = sunsetDateTime, DayLength = dayLength};
+    }
+    
+    private async Task<SunriseSunset> GetSunriseSunsetByCityAndDate(City city, int year, int month, int day)
+    {
+        var sunriseSunsetData = 
+            await _sunsetSunriseDataProvider.GetDataByLongitudeLatitudeAndDate(city.Latitude, city.Longitude, year, month, day);
         var sunriseDateTime = _sunsetSunriseJsonProcessor.GetSunriseDateTime(sunriseSunsetData);
         var sunsetDateTime = _sunsetSunriseJsonProcessor.GetSunsetDateTime(sunriseSunsetData);
         var dayLength = _sunsetSunriseJsonProcessor.GetDayLength(sunriseSunsetData);

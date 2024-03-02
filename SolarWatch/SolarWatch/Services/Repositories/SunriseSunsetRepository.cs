@@ -28,7 +28,7 @@ public class SunriseSunsetRepository : ISunriseSunsetRepository
         using var dbContext = new SolarWatchContext();
         return dbContext.SunriseSunsets.FirstOrDefault(
             s => s.City.Name == cityName &&
-                 s.Sunrise == dateTime);
+                 s.Sunrise.Year == dateTime.Year && s.Sunrise.Month == dateTime.Month && s.Sunrise.Day == dateTime.Day);
     }
 
     public void Add(SunriseSunset sunriseSunset)

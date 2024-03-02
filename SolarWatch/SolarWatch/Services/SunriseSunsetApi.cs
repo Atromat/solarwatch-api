@@ -21,4 +21,15 @@ public class SunriseSunsetApi : ISunsetSunriseDataProvider
         var response = await client.GetAsync(url);
         return await response.Content.ReadAsStringAsync();
     }
+    
+    public async Task<string> GetDataByLongitudeLatitudeAndDate(double latitude, double longitude, int year, int month, int day)
+    {
+        var url = $"https://api.sunrise-sunset.org/json?lat={latitude}&lng={longitude}&formatted=0&date={year}-{month}-{day}";
+
+        var client = new HttpClient();
+
+        _logger.LogInformation("Calling sunrise-sunset.org API with url: {url}", url);
+        var response = await client.GetAsync(url);
+        return await response.Content.ReadAsStringAsync();
+    }
 }
