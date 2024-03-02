@@ -12,13 +12,8 @@ public class SolarWatchContext : DbContext
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
     {
         var configuration = new ConfigurationBuilder()
-            //.SetBasePath(AppDomain.CurrentDomain.BaseDirectory)                     //for getting it from appsettings.json
-            //.AddJsonFile("appsettings.json", optional: true, reloadOnChange: true)  //for getting it from appsettings.json
             .AddUserSecrets(Assembly.GetExecutingAssembly())
             .Build();
-        
-        // optionsBuilder.UseSqlServer(
-        //     configuration.GetConnectionString("SolarWatchDBLocalConnection"));  //for getting it from appsettings.json
         
         optionsBuilder.UseSqlServer(configuration["ConnString"]);
     }

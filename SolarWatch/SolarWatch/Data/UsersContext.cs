@@ -14,13 +14,8 @@ public class UsersContext : IdentityDbContext<IdentityUser, IdentityRole, string
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
     {
         var configuration = new ConfigurationBuilder()
-            //.SetBasePath(AppDomain.CurrentDomain.BaseDirectory)
-            //.AddJsonFile("appsettings.json", optional: true, reloadOnChange: true)
             .AddUserSecrets(Assembly.GetExecutingAssembly())
             .Build();
-        
-        // optionsBuilder.UseSqlServer(
-        //     configuration.GetConnectionString("SolarWatchDBLocalConnection"));
         
         optionsBuilder.UseSqlServer(configuration["ConnString"]);
     }
