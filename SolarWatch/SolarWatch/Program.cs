@@ -119,6 +119,10 @@ void AddAuthentication()
         .AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
         .AddJwtBearer(options =>
         {
+            var validIssuer = builder.Configuration["ValidIssuer"];
+            var validAudience = builder.Configuration["ValidAudience"];
+            var issuerSigningKey = builder.Configuration["IssuerSigningKey"];
+            
             options.TokenValidationParameters = new TokenValidationParameters()
             {
                 ClockSkew = TimeSpan.Zero,
@@ -126,10 +130,10 @@ void AddAuthentication()
                 ValidateAudience = true,
                 ValidateLifetime = true,
                 ValidateIssuerSigningKey = true,
-                ValidIssuer = "apiWithAuthBackend",
-                ValidAudience = "apiWithAuthBackend",
+                ValidIssuer = validIssuer,
+                ValidAudience = validAudience,
                 IssuerSigningKey = new SymmetricSecurityKey(
-                    Encoding.UTF8.GetBytes("!SomethingSecret!!SomethingSecret!")
+                    Encoding.UTF8.GetBytes(issuerSigningKey)
                 ),
             };
             

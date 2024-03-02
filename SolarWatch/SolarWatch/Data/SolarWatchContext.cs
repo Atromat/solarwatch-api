@@ -1,3 +1,4 @@
+using System.Reflection;
 using Microsoft.EntityFrameworkCore;
 using SolarWatch.Model;
 
@@ -11,12 +12,15 @@ public class SolarWatchContext : DbContext
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
     {
         var configuration = new ConfigurationBuilder()
-            .SetBasePath(AppDomain.CurrentDomain.BaseDirectory)
-            .AddJsonFile("appsettings.json", optional: true, reloadOnChange: true)
+            //.SetBasePath(AppDomain.CurrentDomain.BaseDirectory)                     //for getting it from appsettings.json
+            //.AddJsonFile("appsettings.json", optional: true, reloadOnChange: true)  //for getting it from appsettings.json
+            .AddUserSecrets(Assembly.GetExecutingAssembly())
             .Build();
         
-        optionsBuilder.UseSqlServer(
-            configuration.GetConnectionString("SolarWatchDBLocalConnection"));
+        // optionsBuilder.UseSqlServer(
+        //     configuration.GetConnectionString("SolarWatchDBLocalConnection"));  //for getting it from appsettings.json
+        
+        optionsBuilder.UseSqlServer(configuration["ConnString"]);
     }
     
     protected override void OnModelCreating(ModelBuilder builder)
