@@ -98,8 +98,6 @@ void ConfigureSwagger()
 void AddDbContext()
 {
     builder.Services.AddDbContext<UsersContext>();
-    builder.Services.AddScoped<IAuthService, AuthService>();
-    builder.Services.AddScoped<ITokenService, TokenService>();
 }
 
 void AddAuthentication()
@@ -122,6 +120,9 @@ void AddAuthentication()
                 ),
             };
         });
+    
+    builder.Services.AddScoped<IAuthService, AuthService>();
+    builder.Services.AddScoped<ITokenService, TokenService>();
 }
 
 void AddIdentity()
