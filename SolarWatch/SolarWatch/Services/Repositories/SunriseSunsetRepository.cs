@@ -1,3 +1,4 @@
+using Microsoft.EntityFrameworkCore;
 using SolarWatch.Data;
 using SolarWatch.Model;
 
@@ -26,7 +27,9 @@ public class SunriseSunsetRepository : ISunriseSunsetRepository
     public SunriseSunset? GetByNameAndDate(string cityName, DateTime dateTime)
     {
         using var dbContext = new SolarWatchContext();
-        return dbContext.SunriseSunsets.FirstOrDefault(
+        return dbContext.SunriseSunsets
+            .Include(sunriseSunset => sunriseSunset.City)
+            .FirstOrDefault(
             s => s.City.Name == cityName &&
                  s.Sunrise.Year == dateTime.Year && s.Sunrise.Month == dateTime.Month && s.Sunrise.Day == dateTime.Day);
     }
