@@ -22,7 +22,20 @@ builder.Services.AddCors(options =>
     options.AddPolicy(name: "MyAllowSpecificOrigins",
         policy  =>
         {
-            policy.WithOrigins("*").AllowAnyHeader();
+            policy
+                //.WithOrigins("*") //doesn't work with credentiels included
+                .AllowAnyHeader()
+                .AllowAnyMethod()
+                .AllowCredentials()
+                .SetIsOriginAllowed(origin =>
+                {
+                    if (string.IsNullOrWhiteSpace(origin)) return false;
+                    // Only add this to allow testing with localhost, remove this line in production!
+                    if (origin.ToLower().StartsWith("http://localhost")) return true;
+                    // Insert your production domain here.
+                    if (origin.ToLower().StartsWith("https://dev.mydomain.com")) return true;
+                    return false;
+                });
         });
 });
 
@@ -124,7 +137,7 @@ void AddAuthentication()
             {
                 OnMessageReceived = context =>
                 {
-                    context.Token = context.Request.Cookies["User"];
+                    context.Token = context.Request.Cookies["token"];
                     return Task.CompletedTask;
                 }
             };
