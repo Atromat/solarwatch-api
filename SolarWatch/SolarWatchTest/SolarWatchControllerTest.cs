@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using SolarWatch.Controllers;
+using SolarWatch.Data;
 using SolarWatch.Services;
 
 namespace SolarWatchTest;
@@ -9,22 +10,24 @@ namespace SolarWatchTest;
 public class SolarWatchControllerTest
 {
     private Mock<ILogger<SolarWatchController>> _loggerMock;
-    private Mock<ICoordDataProvider> _coordDataProviderMock;
+    private Mock<ICityDataProvider> _coordDataProviderMock;
     private Mock<ISunsetSunriseDataProvider> _sunsetSunriseDataProviderMock;
-    private Mock<IJsonProcessor> _jsonProcessorMock;
-    private Mock<ISunsetSunriseJsonProcessor> _sunsetSunriseJsonProcessor;
+    private Mock<IWeatherMapJsonProcessor> _jsonProcessorMock;
+    private Mock<ISunsetSunriseJsonProcessor> _sunsetSunriseJsonProcessorMock;
+    private Mock<SolarWatchContext> _solarWatchContextMock;
     private SolarWatchController _controller;
 
     [SetUp]
     public void SetUp()
     {
         _loggerMock = new Mock<ILogger<SolarWatchController>>();
-        _coordDataProviderMock = new Mock<ICoordDataProvider>();
+        _coordDataProviderMock = new Mock<ICityDataProvider>();
         _sunsetSunriseDataProviderMock = new Mock<ISunsetSunriseDataProvider>();
-        _jsonProcessorMock = new Mock<IJsonProcessor>();
-        _sunsetSunriseJsonProcessor = new Mock<ISunsetSunriseJsonProcessor>();
+        _jsonProcessorMock = new Mock<IWeatherMapJsonProcessor>();
+        _sunsetSunriseJsonProcessorMock = new Mock<ISunsetSunriseJsonProcessor>();
+        _solarWatchContextMock = new Mock<SolarWatchContext>();
         _controller = new SolarWatchController(_loggerMock.Object, _jsonProcessorMock.Object, _coordDataProviderMock.Object,
-            _sunsetSunriseDataProviderMock.Object, _sunsetSunriseJsonProcessor.Object);
+            _sunsetSunriseDataProviderMock.Object, _sunsetSunriseJsonProcessorMock.Object, _solarWatchContextMock.Object);
     }
 
     [Test]
@@ -125,7 +128,7 @@ public class SolarWatchControllerTest
         _jsonProcessorMock.Setup(x => x.GetLongitudeLatitude(It.IsAny<string>()))
             .Returns((47.4979937, 19.0403594));
 
-        _sunsetSunriseJsonProcessor.Setup(x => x.GetSunrise(It.IsAny<string>())).Returns(new TimeOnly(1, 1));
+        _sunsetSunriseJsonProcessorMock.Setup(x => x.GetSunrise(It.IsAny<string>())).Returns(new TimeOnly(1, 1));
 
         var result = await _controller.GetSunriseTime("sdfsfs");
         Console.WriteLine(result.Result);
@@ -231,7 +234,7 @@ public class SolarWatchControllerTest
         _jsonProcessorMock.Setup(x => x.GetLongitudeLatitude(It.IsAny<string>()))
             .Returns((47.4979937, 19.0403594));
 
-        _sunsetSunriseJsonProcessor.Setup(x => x.GetSunset(It.IsAny<string>())).Returns(new TimeOnly(1, 1));
+        _sunsetSunriseJsonProcessorMock.Setup(x => x.GetSunset(It.IsAny<string>())).Returns(new TimeOnly(1, 1));
 
         var result = await _controller.GetSunsetTime("sdfsfs");
         Console.WriteLine(result.Result);
@@ -239,12 +242,12 @@ public class SolarWatchControllerTest
         Assert.IsInstanceOf(typeof(NotFoundObjectResult), result.Result);
     }
     
-        [Test]
+    [Test]
     public async Task GetSunriseTimeNotFoundResultIfCoordDataProviderFails()
     {
         _sunsetSunriseDataProviderMock.Setup(
             x => x.GetDataByLongitudeLatitude(It.IsAny<double>(), It.IsAny<double>()))
-            .Returns(@"
+            .ReturnsAsync(@"
             {
                 ""results"": {
                     ""sunrise"": ""2024-01-22T06:19:56+00:00"",
@@ -267,7 +270,7 @@ public class SolarWatchControllerTest
         _jsonProcessorMock.Setup(x => x.GetLongitudeLatitude(It.IsAny<string>()))
             .Returns((47.4979937, 19.0403594));
 
-        _sunsetSunriseJsonProcessor.Setup(x => x.GetSunrise(It.IsAny<string>())).Returns(new TimeOnly(1, 1));
+        _sunsetSunriseJsonProcessorMock.Setup(x => x.GetSunrise(It.IsAny<string>())).Returns(new TimeOnly(1, 1));
 
         var result = await _controller.GetSunriseTime("sdfsfs");
         Console.WriteLine(result.Result);
