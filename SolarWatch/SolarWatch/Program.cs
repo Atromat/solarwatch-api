@@ -1,6 +1,7 @@
 using System.Text;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using SolarWatch.Services;
@@ -9,6 +10,11 @@ using SolarWatch.Data;
 using SolarWatch.Services.Authentication;
 
 var builder = WebApplication.CreateBuilder(args);
+
+var config =
+    new ConfigurationBuilder()
+        .AddUserSecrets<Program>()
+        .Build();
 
 // Add services to the container.
 AddServices();
@@ -76,8 +82,8 @@ void AddServices()
     builder.Services.AddSingleton<IWeatherMapJsonProcessor, WeatherMapWeatherMapJsonProcessor>();
     builder.Services.AddSingleton<ISunsetSunriseDataProvider, SunriseSunsetApi>();
     builder.Services.AddSingleton<ISunsetSunriseJsonProcessor, SunsetSunriseJsonProcessor>();
-    builder.Services.AddSingleton<ICityRepository, CityRepository>();
-    builder.Services.AddSingleton<ISunriseSunsetRepository, SunriseSunsetRepository>();
+    builder.Services.AddTransient<ICityRepository, CityRepository>();
+    builder.Services.AddTransient<ISunriseSunsetRepository, SunriseSunsetRepository>();
     builder.Services.AddScoped<AuthenticationSeeder>();
 }
 
@@ -114,7 +120,8 @@ void ConfigureSwagger()
 
 void AddDbContext()
 {
-    builder.Services.AddDbContext<UsersContext>();
+    builder.Services.AddDbContext<SolarWatchContext>((container, options) =>
+        options.UseSqlServer(config["ConnString"]));
 }
 
 void AddAuthentication()
@@ -169,7 +176,7 @@ void AddIdentity()
             options.Password.RequireLowercase = false;
         })
         .AddRoles<IdentityRole>() //Enable Identity roles 
-        .AddEntityFrameworkStores<UsersContext>();
+        .AddEntityFrameworkStores<SolarWatchContext>();
 }
 
 public partial class Program { }

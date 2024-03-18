@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using SolarWatch.Data;
 using SolarWatch.Model;
 using SolarWatch.Services;
 using SolarWatch.Services.Repositories;
@@ -15,25 +16,22 @@ public class SolarWatchController : ControllerBase
     private readonly ICityDataProvider _cityDataProvider;
     private readonly ISunsetSunriseDataProvider _sunsetSunriseDataProvider;
     private readonly ISunsetSunriseJsonProcessor _sunsetSunriseJsonProcessor;
-    private readonly ICityRepository _cityRepository;
-    private readonly ISunriseSunsetRepository _sunriseSunsetRepository;
-
+    private UnitOfWork _unitOfWork;
+    
     public SolarWatchController(
         ILogger<SolarWatchController> logger, 
         IWeatherMapJsonProcessor weatherMapJsonProcessor,
         ICityDataProvider cityDataProvider, 
         ISunsetSunriseDataProvider sunsetSunriseDataProvider,
         ISunsetSunriseJsonProcessor sunsetSunriseJsonProcessor,
-        ICityRepository cityRepository,
-        ISunriseSunsetRepository sunriseSunsetRepository)
+        SolarWatchContext solarWatchContext)
     {
         _logger = logger;
         _weatherMapJsonProcessor = weatherMapJsonProcessor;
         _cityDataProvider = cityDataProvider;
         _sunsetSunriseDataProvider = sunsetSunriseDataProvider;
         _sunsetSunriseJsonProcessor = sunsetSunriseJsonProcessor;
-        _cityRepository = cityRepository;
-        _sunriseSunsetRepository = sunriseSunsetRepository;
+        _unitOfWork = new UnitOfWork(solarWatchContext);
     }
 
     [HttpGet("GetSunriseTime")]
@@ -77,16 +75,17 @@ public class SolarWatchController : ControllerBase
     {
         try
         {
-            City? city = _cityRepository.GetByName(cityName);
+            City? city = _unitOfWork.CityRepository.GetByName(cityName);
             
             if (city != null)
             {
-                SunriseSunset? sunriseSunset = _sunriseSunsetRepository.GetByNameAndDate(cityName, new DateTime(year, month, day));
+                SunriseSunset? sunriseSunset = _unitOfWork.SunriseSunsetRepository.GetByNameAndDate(cityName, new DateTime(year, month, day));
                 
                 if (sunriseSunset == null)
                 {
                     var sunriseSunsetFromApi = await GetSunriseSunsetByCityAndDate(city, year, month, day);
-                    _sunriseSunsetRepository.Add(sunriseSunsetFromApi);
+                    _unitOfWork.SunriseSunsetRepository.Add(sunriseSunsetFromApi);
+                    _unitOfWork.Save();
                     return Ok(sunriseSunsetFromApi);
                 }
                 
@@ -94,10 +93,11 @@ public class SolarWatchController : ControllerBase
             }
 
             var cityFromApi = await GetCity(cityName);
-            _cityRepository.Add(cityFromApi);
+            _unitOfWork.CityRepository.Add(cityFromApi);
+            _unitOfWork.Save();
             var sunriseSunsetFromBothApi = await GetSunriseSunset(cityFromApi);
-            _sunriseSunsetRepository.Add(sunriseSunsetFromBothApi);
-            //var sunriseSunsetFromApi = new SunriseSunset(); //hiba lenne miért??
+            _unitOfWork.SunriseSunsetRepository.Add(sunriseSunsetFromBothApi);
+            _unitOfWork.Save();
             
             return Ok(sunriseSunsetFromBothApi);
         }
@@ -151,7 +151,7 @@ public class SolarWatchController : ControllerBase
     {
         try
         {
-            City? city = _cityRepository.GetByName(cityName);
+            City? city = _unitOfWork.CityRepository.GetByName(cityName);
             
             if (city != null)
             {
@@ -163,13 +163,14 @@ public class SolarWatchController : ControllerBase
                     DayLength = dayLength
                 };
                 
-                _sunriseSunsetRepository.Add(sunriseSunset);
+                _unitOfWork.SunriseSunsetRepository.Add(sunriseSunset);
+                _unitOfWork.Save();
                 
                 return Ok("Successfully added SunriseSunset.");
             }
 
             var cityFromApi = await GetCity(cityName);
-            _cityRepository.Add(cityFromApi);
+            _unitOfWork.CityRepository.Add(cityFromApi);
             
             var sunriseSunsetForDb = new SunriseSunset
             {
@@ -179,7 +180,8 @@ public class SolarWatchController : ControllerBase
                 DayLength = dayLength
             };
             
-            _sunriseSunsetRepository.Add(sunriseSunsetForDb);
+            _unitOfWork.SunriseSunsetRepository.Add(sunriseSunsetForDb);
+            _unitOfWork.Save();
             
             return Ok("Successfully added SunriseSunset.");
         }
@@ -191,16 +193,18 @@ public class SolarWatchController : ControllerBase
     }
     
     [HttpPatch("UpdateSunriseSunset"), Authorize(Roles="Admin")]
-    public async Task<ActionResult<SunriseSunset>> UpdateSunriseSunset(int id, string cityName, 
-        int sunriseYear, int sunriseMonth, int sunriseDay, int sunriseHour, int sunriseMinute, int sunriseSecond,
-        int sunsetYear, int sunsetMonth, int sunsetDay, int sunsetHour, int sunsetMinute, int sunsetsSecond,
+    public async Task<ActionResult<SunriseSunset>> UpdateSunriseSunset(
+        int id, string cityName, 
+        int year, int month, int day, 
+        int sunriseHour, int sunriseMinute, int sunriseSecond, 
+        int sunsetHour, int sunsetMinute, int sunsetsSecond,
         int dayLength)
     {
         try
         {
-            City? city = _cityRepository.GetByName(cityName);
+            City? city = _unitOfWork.CityRepository.GetByName(cityName);
 
-            SunriseSunset? sunriseSunsetFromDb = _sunriseSunsetRepository.GetById(id);
+            SunriseSunset? sunriseSunsetFromDb = _unitOfWork.SunriseSunsetRepository.GetById(id);
 
             if (sunriseSunsetFromDb == null)
             {
@@ -209,33 +213,27 @@ public class SolarWatchController : ControllerBase
             
             if (city != null)
             {
-                var sunriseSunset = new SunriseSunset
-                {
-                    Id = id,
-                    City = city,
-                    Sunrise = new DateTime(sunriseYear, sunriseMonth, sunriseDay, sunriseHour, sunriseMinute, sunriseSecond),
-                    Sunset = new DateTime(sunsetYear, sunsetMonth, sunsetDay, sunsetHour, sunsetMinute, sunsetsSecond),
-                    DayLength = dayLength
-                };
+                sunriseSunsetFromDb.City = city;
+                sunriseSunsetFromDb.Sunrise = new DateTime(year, month, day, sunriseHour, sunriseMinute, sunriseSecond);
+                sunriseSunsetFromDb.Sunset = new DateTime(year, month, day, sunsetHour, sunsetMinute, sunsetsSecond);
+                sunriseSunsetFromDb.DayLength = dayLength;
                 
-                _sunriseSunsetRepository.Update(sunriseSunset);
+                _unitOfWork.SunriseSunsetRepository.Update(sunriseSunsetFromDb);
+                _unitOfWork.Save();
                 
                 return Ok("Successfully updated SunriseSunset.");
             }
 
             var cityFromApi = await GetCity(cityName);
-            _cityRepository.Add(cityFromApi);
+            _unitOfWork.CityRepository.Add(cityFromApi);
             
-            var sunriseSunsetForDb = new SunriseSunset
-            {
-                Id = id,
-                City = cityFromApi,
-                Sunrise = new DateTime(sunriseYear, sunriseMonth, sunriseDay, sunriseHour, sunriseMinute, sunriseSecond),
-                Sunset = new DateTime(sunsetYear, sunsetMonth, sunsetDay, sunsetHour, sunsetMinute, sunsetsSecond),
-                DayLength = dayLength
-            };
+            sunriseSunsetFromDb.City = city;
+            sunriseSunsetFromDb.Sunrise = new DateTime(year, month, day, sunriseHour, sunriseMinute, sunriseSecond);
+            sunriseSunsetFromDb.Sunset = new DateTime(year, month, day, sunsetHour, sunsetMinute, sunsetsSecond);
+            sunriseSunsetFromDb.DayLength = dayLength;
             
-            _sunriseSunsetRepository.Update(sunriseSunsetForDb);
+            _unitOfWork.SunriseSunsetRepository.Update(sunriseSunsetFromDb);
+            _unitOfWork.Save();
             
             return Ok("Successfully updated SunriseSunset.");
         }
@@ -251,14 +249,15 @@ public class SolarWatchController : ControllerBase
     {
         try
         {
-            SunriseSunset? sunriseSunsetFromDb = _sunriseSunsetRepository.GetById(id);
+            SunriseSunset? sunriseSunsetFromDb = _unitOfWork.SunriseSunsetRepository.GetById(id);
 
             if (sunriseSunsetFromDb == null)
             {
                 return NotFound($"Couldn't delete SunriseSunset by id {id} because it doesn't exist.");
             }
             
-            _sunriseSunsetRepository.Delete(id);
+            _unitOfWork.SunriseSunsetRepository.Delete(id);
+            _unitOfWork.Save();
             
             return Ok("Successfully deleted SunriseSunset.");
         }

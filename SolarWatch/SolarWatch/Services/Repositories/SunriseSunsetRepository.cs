@@ -6,27 +6,30 @@ namespace SolarWatch.Services.Repositories;
 
 public class SunriseSunsetRepository : ISunriseSunsetRepository
 {
+    private SolarWatchContext dbContext;
+
+    public SunriseSunsetRepository(SolarWatchContext dbContext)
+    {
+        this.dbContext = dbContext;
+    }
+
     public IEnumerable<SunriseSunset> GetAll()
     {
-        using var dbContext = new SolarWatchContext();
         return dbContext.SunriseSunsets.ToList();
     }
 
     public SunriseSunset? GetById(int id)
     {
-        using var dbContext = new SolarWatchContext();
         return dbContext.SunriseSunsets.FirstOrDefault(s => s.Id == id);
     }
     
     public SunriseSunset? GetByName(string cityName)
     {
-        using var dbContext = new SolarWatchContext();
         return dbContext.SunriseSunsets.FirstOrDefault(s => s.City.Name == cityName);
     }
     
     public SunriseSunset? GetByNameAndDate(string cityName, DateTime dateTime)
     {
-        using var dbContext = new SolarWatchContext();
         return dbContext.SunriseSunsets
             .Include(sunriseSunset => sunriseSunset.City)
             .FirstOrDefault(
@@ -36,8 +39,6 @@ public class SunriseSunsetRepository : ISunriseSunsetRepository
 
     public void Add(SunriseSunset sunriseSunset)
     {
-        using var dbContext = new SolarWatchContext();
-        //dbContext.Add(sunriseSunset);
         var cityDb = dbContext.Cities.FirstOrDefault(city => city.Id == sunriseSunset.City.Id);
         dbContext.Add(new SunriseSunset
         {
@@ -46,21 +47,16 @@ public class SunriseSunsetRepository : ISunriseSunsetRepository
             Sunset = sunriseSunset.Sunset, 
             DayLength = sunriseSunset.DayLength
         });
-        dbContext.SaveChanges();
     }
 
     public void Delete(int id)
     {
-        using var dbContext = new SolarWatchContext();
         var sunriseSunset = dbContext.SunriseSunsets.First(s => s.Id == id);
         dbContext.Remove(sunriseSunset);
-        dbContext.SaveChanges();
     }
 
     public void Update(SunriseSunset sunriseSunset)
     {  
-        using var dbContext = new SolarWatchContext();
         dbContext.Update(sunriseSunset);
-        dbContext.SaveChanges();
     }
 }
