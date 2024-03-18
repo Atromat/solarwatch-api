@@ -144,9 +144,11 @@ public class SolarWatchController : ControllerBase
     }
     
     [HttpPost("PostSunriseSunset"), Authorize(Roles="Admin")]
-    public async Task<ActionResult<SunriseSunset>> PostSunriseSunset(string cityName, 
-        int sunriseYear, int sunriseMonth, int sunriseDay, int sunriseHour, int sunriseMinute, int sunriseSecond,
-        int sunsetYear, int sunsetMonth, int sunsetDay, int sunsetHour, int sunsetMinute, int sunsetSecond,
+    public async Task<ActionResult<SunriseSunset>> PostSunriseSunset(
+        string cityName, 
+        int year, int month, int day, 
+        int sunriseHour, int sunriseMinute, int sunriseSecond,
+        int sunsetHour, int sunsetMinute, int sunsetSecond,
         int dayLength)
     {
         try
@@ -158,8 +160,8 @@ public class SolarWatchController : ControllerBase
                 var sunriseSunset = new SunriseSunset
                 {
                     City = city,
-                    Sunrise = new DateTime(sunriseYear, sunriseMonth, sunriseDay, sunriseHour, sunriseMinute, sunriseSecond),
-                    Sunset = new DateTime(sunsetYear, sunsetMonth, sunsetDay, sunsetHour, sunsetMinute, sunsetSecond),
+                    Sunrise = new DateTime(year, month, day, sunriseHour, sunriseMinute, sunriseSecond),
+                    Sunset = new DateTime(year, month, day, sunsetHour, sunsetMinute, sunsetSecond),
                     DayLength = dayLength
                 };
                 
@@ -175,8 +177,8 @@ public class SolarWatchController : ControllerBase
             var sunriseSunsetForDb = new SunriseSunset
             {
                 City = cityFromApi,
-                Sunrise = new DateTime(sunriseYear, sunriseMonth, sunriseDay, sunriseHour, sunriseMinute, sunriseSecond),
-                Sunset = new DateTime(sunsetYear, sunsetMonth, sunsetDay, sunsetHour, sunsetMinute, sunsetSecond),
+                Sunrise = new DateTime(year, month, day, sunriseHour, sunriseMinute, sunriseSecond),
+                Sunset = new DateTime(year, month, day, sunsetHour, sunsetMinute, sunsetSecond),
                 DayLength = dayLength
             };
             
