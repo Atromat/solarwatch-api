@@ -269,4 +269,107 @@ public class SolarWatchController : ControllerBase
             return StatusCode(500, "Error deleting SunriseSunset data");
         }
     }
+    
+    [HttpGet("GetCityFromDb"), Authorize(Roles="Admin")]
+    public async Task<ActionResult<City>> GetCityFromDb(string name)
+    {
+        try
+        {
+            City? city = _unitOfWork.CityRepository.GetByName(name);
+            
+            if (city == null)
+            {
+                return BadRequest("A city with that name doesn't exists.");
+            }
+            
+            return Ok(city);
+        }
+        catch (Exception e)
+        {
+            _logger.LogError(e, "Error getting City data");
+            return StatusCode(500, "Error getting City data");
+        }
+    }
+    
+    [HttpPost("PostCity"), Authorize(Roles="Admin")]
+    public async Task<ActionResult> PostCity(string name, double latitude, double longitude, string country, string? state)
+    {
+        try
+        {
+            City? city = _unitOfWork.CityRepository.GetByName(name);
+            
+            if (city != null)
+            {
+                return BadRequest("A city with that name already exists.");
+            }
+            
+            _unitOfWork.CityRepository.Add(new City
+            {
+                Name = name, Latitude = latitude, Longitude = longitude, Country = country, State = state
+            });
+            
+            _unitOfWork.Save();
+            
+            return Ok("Successfully added city.");
+        }
+        catch (Exception e)
+        {
+            _logger.LogError(e, "Error posting City data");
+            return StatusCode(500, "Error posting City data");
+        }
+    }
+    
+    [HttpPatch("UpdateCity"), Authorize(Roles="Admin")]
+    public async Task<ActionResult> UpdateCity(string name, double latitude, double longitude, string country, string? state)
+    {
+        try
+        {
+            City? city = _unitOfWork.CityRepository.GetByName(name);
+            
+            if (city == null)
+            {
+                return BadRequest("A city with that name doesn't exists.");
+            }
+
+            city.Name = name;
+            city.Latitude = latitude;
+            city.Longitude = longitude;
+            city.Country = country;
+            city.State = state;
+            
+            _unitOfWork.CityRepository.Update(city);
+            _unitOfWork.Save();
+            
+            return Ok("Successfully updated city.");
+        }
+        catch (Exception e)
+        {
+            _logger.LogError(e, "Error updating City data");
+            return StatusCode(500, "Error updating City data");
+        }
+    }
+    
+    [HttpDelete("DeleteCity"), Authorize(Roles="Admin")]
+    public async Task<ActionResult> DeleteCity(string name)
+    {
+        try
+        {
+            City? city = _unitOfWork.CityRepository.GetByName(name);
+            
+            if (city == null)
+            {
+                return BadRequest("A city with that name doesn't exists.");
+            }
+            
+            _unitOfWork.CityRepository.Delete(city);
+            _unitOfWork.Save();
+            
+            return Ok("Successfully deleted city.");
+        }
+        catch (Exception e)
+        {
+            _logger.LogError(e, "Error deleting City data");
+            return StatusCode(500, "Error deleting City data");
+        }
+    }
 }
