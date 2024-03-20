@@ -13,6 +13,8 @@ import Login from './Pages/Login.jsx';
 import Register from './Pages/Register.jsx';
 import SunsetSunrise from './Pages/SunsetSunrise.jsx';
 
+const url = "http://localhost:5062/";
+
 const router = createBrowserRouter([
   {
     path: "/",
@@ -41,7 +43,7 @@ const router = createBrowserRouter([
       },
       {
         path: "/Login",
-        element: <Login />,
+        element: <Login url={url} />,
       }
     ],
   },
