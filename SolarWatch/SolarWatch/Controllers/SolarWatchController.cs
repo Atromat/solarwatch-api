@@ -84,6 +84,11 @@ public class SolarWatchController : ControllerBase
                 return Ok("guest");
             }
             
+            if (User.Identity.Name == null)
+            {
+                return Ok("guest");
+            }
+            
             var user = await _userManager.FindByNameAsync(User.Identity.Name);
             var role = await _userManager.GetRolesAsync(user);
 
