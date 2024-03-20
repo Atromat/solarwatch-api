@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using SolarWatch.Data;
 using SolarWatch.Model;
@@ -17,6 +18,7 @@ public class SolarWatchController : ControllerBase
     private readonly ISunsetSunriseDataProvider _sunsetSunriseDataProvider;
     private readonly ISunsetSunriseJsonProcessor _sunsetSunriseJsonProcessor;
     private UnitOfWork _unitOfWork;
+    private readonly UserManager<IdentityUser> _userManager;
     
     public SolarWatchController(
         ILogger<SolarWatchController> logger, 
@@ -24,7 +26,8 @@ public class SolarWatchController : ControllerBase
         ICityDataProvider cityDataProvider, 
         ISunsetSunriseDataProvider sunsetSunriseDataProvider,
         ISunsetSunriseJsonProcessor sunsetSunriseJsonProcessor,
-        SolarWatchContext solarWatchContext)
+        SolarWatchContext solarWatchContext,
+        UserManager<IdentityUser> userManager)
     {
         _logger = logger;
         _weatherMapJsonProcessor = weatherMapJsonProcessor;
@@ -32,6 +35,7 @@ public class SolarWatchController : ControllerBase
         _sunsetSunriseDataProvider = sunsetSunriseDataProvider;
         _sunsetSunriseJsonProcessor = sunsetSunriseJsonProcessor;
         _unitOfWork = new UnitOfWork(solarWatchContext);
+        _userManager = userManager;
     }
 
     [HttpGet("GetSunriseTime")]
@@ -67,6 +71,28 @@ public class SolarWatchController : ControllerBase
         {
             _logger.LogError(e, "Error getting sun rise data");
             return NotFound("Error getting sun rise data");
+        }
+    }
+    
+    [HttpGet("GetRole")]
+    public async Task<ActionResult<string>> GetRole()
+    {
+        try
+        {
+            if (User.Identity == null)
+            {
+                return Ok("guest");
+            }
+            
+            var user = await _userManager.FindByNameAsync(User.Identity.Name);
+            var role = await _userManager.GetRolesAsync(user);
+
+            return Ok(role.First());
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine(e);
+            return StatusCode(500, "Couldn't get role.");
         }
     }
     
