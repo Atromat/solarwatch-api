@@ -17,7 +17,7 @@ public class SolarWatchController : ControllerBase
     private readonly ICityDataProvider _cityDataProvider;
     private readonly ISunsetSunriseDataProvider _sunsetSunriseDataProvider;
     private readonly ISunsetSunriseJsonProcessor _sunsetSunriseJsonProcessor;
-    private UnitOfWork _unitOfWork;
+    private readonly UnitOfWork _unitOfWork;
     private readonly UserManager<IdentityUser> _userManager;
     
     public SolarWatchController(
