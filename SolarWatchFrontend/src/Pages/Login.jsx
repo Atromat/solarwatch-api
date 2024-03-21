@@ -2,11 +2,29 @@ import React from 'react';
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 
-function Login({url}) {
+function Login({url, handleUserRole}) {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+
+  async function fetchRole() {
+    try{
+      const res = await fetch(`${url}SolarWatch/GetRole`, {
+        method: "GET",
+        credentials: 'include',
+      });
+
+      if (!res.ok) {
+        throw new Error(`HTTP error! status: ${res.status}`);
+      }
+
+      return await res.text();
+    }
+    catch(error){
+      throw error;
+    }
+  };
 
   const handleSubmit = async e => {
     e.preventDefault();
@@ -19,9 +37,13 @@ function Login({url}) {
            },
         body: JSON.stringify({email: email, password: password}),
       });
+      
       if (!res.ok) {
         throw new Error(`HTTP error! status: ${res.status}`);
       }
+
+      handleUserRole(await fetchRole());
+
       navigate('/');
     }
     catch(error){
