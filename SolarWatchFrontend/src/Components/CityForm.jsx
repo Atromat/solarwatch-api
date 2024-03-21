@@ -24,14 +24,39 @@ function CityForm({url, city}) {
       }
     } 
     catch (error) {
+      setLoading(false);
+      throw error
+    }
+  }
+
+  async function fetchUpdateCity() {
+    try {
+      const res = await fetch(`${url}SolarWatch/UpdateCity?name=${name}&latitude=${latitude}&longitude=${longitude}&state=${state}&country=${country}`, {
+        method: "PATCH",
+        credentials: 'include',
+        headers: { 
+          "Content-Type": "application/json",
+           }
+      });
+
+      if (!res.ok) {
+        throw new Error(`HTTP error! status: ${res.status}`);
+      }
+    } 
+    catch (error) {
+      setLoading(false);
       throw error
     }
   }
 
   async function onSubmit(e) {
-    setLoading(true);
     e.preventDefault();
-    await fetchPostCity();
+    setLoading(true);
+    if (e.nativeEvent.submitter.name === "AddCity") {
+      await fetchPostCity();
+    } else if (e.nativeEvent.submitter.name === "UpdateCity") {
+      await fetchUpdateCity();
+    }
     setLoading(false);
   }
 
@@ -98,8 +123,12 @@ function CityForm({url, city}) {
         </div>
 
         <div className="buttons">
-          <button type="submit" disabled={loading}>
+          <button type="submit" disabled={loading} name="AddCity">
             Add
+          </button>
+
+          <button type="submit" disabled={loading} name="UpdateCity">
+            UpdateCity
           </button>
 
           <button type="button" onClick={onCancel}>
