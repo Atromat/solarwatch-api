@@ -51,14 +51,9 @@ function Layout({url, userRole, handleUserRole}) {
           </>
         }
         {userRole === "Admin" ?
-        <>
           <li className="grow">
             <Link to="/CityTable">CityTable</Link>
           </li>
-          <li className="grow">
-            <Link to="/SunsetSunriseTable">SunsetSunriseTable</Link>
-          </li>
-        </>
         : <></>
         }
       </ul>
