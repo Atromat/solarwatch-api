@@ -65,7 +65,7 @@ public class AuthController : ControllerBase
     }
     
     [Authorize(Roles = "User, Admin")]
-    [HttpPost("Logout")]
+    [HttpGet("Logout")]
     public IActionResult Logout()
     {
         HttpContext.Response.Cookies.Delete("token");
