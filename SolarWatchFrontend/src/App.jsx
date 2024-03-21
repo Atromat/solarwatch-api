@@ -10,7 +10,6 @@ import CityTable from './Pages/CityTable.jsx';
 import SunsetSunriseTable from './Pages/SunsetSunriseTable.jsx';
 import Login from './Pages/Login.jsx';
 import Register from './Pages/Register.jsx';
-import SunsetSunrise from './Pages/SunsetSunrise.jsx';
 
 function App() {
   const url = "http://localhost:5062/";
@@ -54,15 +53,15 @@ function App() {
       children: [
         {
           path: "/",
-          element: <Home />,
+          element: <Home url={url} userRole={userRole} />,
         },
         {
           path: "/SunsetSunriseTable",
-          element: <SunsetSunriseTable />,
+          element: <SunsetSunriseTable url={url} />,
         },
         {
           path: "/CityTable",
-          element: <CityTable />,
+          element: <CityTable url={url} />,
         },
         {
           path: "/Register",

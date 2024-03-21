@@ -1,8 +1,11 @@
-import React from 'react'
+import React from 'react';
+import CityForm from '../Components/CityForm';
 
-function CityTable() {
+function CityTable({url}) {
   return (
-    <div>CityTable</div>
+    <div>
+      <CityForm url={url} />;
+    </div>
   )
 }
 
