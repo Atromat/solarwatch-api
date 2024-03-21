@@ -1,13 +1,24 @@
 import React from 'react';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 
-function CityForm({url, city}) {
-  const [name, setName] = useState(city?.name ?? "");
-  const [latitude, setLatitude] = useState(city?.latitude ?? "");
-  const [longitude, setLongitude] = useState(city?.longitude ?? "");
-  const [state, setState] = useState(city?.state ?? "");
-  const [country, setCountry] = useState(city?.country ?? "");
+function CityForm({url, pickedCity}) {
+  const [name, setName] = useState("");
+  const [latitude, setLatitude] = useState("");
+  const [longitude, setLongitude] = useState("");
+  const [state, setState] = useState("");
+  const [country, setCountry] = useState("");
   const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    if (pickedCity !== undefined) {
+      setName(pickedCity.name ?? "");
+      setLatitude(pickedCity.latitude ?? "");
+      setLongitude(pickedCity.longitude ?? "");
+      setState(pickedCity.state ?? "");
+      setCountry(pickedCity.country ?? "");
+    }
+  }, [pickedCity])
+  
 
   async function fetchPostCity() {
     try {
@@ -49,14 +60,39 @@ function CityForm({url, city}) {
     }
   }
 
+  async function fetchDeleteCity() {
+    try {
+      const res = await fetch(`${url}SolarWatch/DeleteCity?name=${name}`, {
+        method: "DELETE",
+        credentials: 'include',
+        headers: { 
+          "Content-Type": "application/json",
+           }
+      });
+
+      if (!res.ok) {
+        throw new Error(`HTTP error! status: ${res.status}`);
+      }
+    } 
+    catch (error) {
+      setLoading(false);
+      throw error
+    }
+  }
+
   async function onSubmit(e) {
     e.preventDefault();
+
     setLoading(true);
+
     if (e.nativeEvent.submitter.name === "AddCity") {
       await fetchPostCity();
     } else if (e.nativeEvent.submitter.name === "UpdateCity") {
       await fetchUpdateCity();
+    } else if (e.nativeEvent.submitter.name === "DeleteCity") {
+      await fetchDeleteCity();
     }
+
     setLoading(false);
   }
 
@@ -128,7 +164,11 @@ function CityForm({url, city}) {
           </button>
 
           <button type="submit" disabled={loading} name="UpdateCity">
-            UpdateCity
+            Update
+          </button>
+
+          <button type="submit" disabled={loading} name="DeleteCity">
+            Delete
           </button>
 
           <button type="button" onClick={onCancel}>
