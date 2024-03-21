@@ -322,6 +322,22 @@ public class SolarWatchController : ControllerBase
         }
     }
     
+    [HttpGet("GetCities"), Authorize(Roles="Admin")]
+    public async Task<ActionResult<City>> GetCities()
+    {
+        try
+        {
+            var cities = _unitOfWork.CityRepository.GetAll();
+            
+            return Ok(cities.ToArray());
+        }
+        catch (Exception e)
+        {
+            _logger.LogError(e, "Error getting cities data");
+            return StatusCode(500, "Error getting cities data");
+        }
+    }
+    
     [HttpPost("PostCity"), Authorize(Roles="Admin")]
     public async Task<ActionResult> PostCity(string name, double latitude, double longitude, string country, string? state)
     {
