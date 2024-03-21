@@ -87,13 +87,13 @@ function Home({url, userRole}) {
   
             <div className="buttons">
               <button type="submit" disabled={loading}>
-                "Submit"
+                Submit
               </button>
             </div>
           </form>
           <div className='sunriseSunsetContainer'>
           {loading ? 
-            <h2>"Loading"</h2>
+            <h2>Loading</h2>
             :
             <>
             {sunriseSunset !== undefined ? 
