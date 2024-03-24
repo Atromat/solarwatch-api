@@ -1,8 +1,15 @@
 import React from 'react';
 import CityForm from '../Components/CityForm';
 import { useState, useEffect } from 'react';
+import { useNavigate } from "react-router-dom";
 
-function CityTable({url}) {
+function CityTable({url, userRole}) {
+  const navigate = useNavigate();
+  
+  if (userRole !== "Admin") {
+    navigate('/');
+  }
+
   const [cities, setCities] = useState(undefined);
   const [loading, setLoading] = useState(true);
   const [pickedCity, setPickedCity] = useState(undefined);
