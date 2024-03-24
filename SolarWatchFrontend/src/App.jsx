@@ -7,7 +7,6 @@ import Home from './Pages/Home.jsx';
 import Layout from './Pages/Layout/Layout.jsx';
 import ErrorPage from './Pages/ErrorPage.jsx';
 import CityTable from './Pages/CityTable.jsx';
-import SunsetSunriseTable from './Pages/SunsetSunriseTable.jsx';
 import Login from './Pages/Login.jsx';
 import Register from './Pages/Register.jsx';
 
@@ -56,12 +55,8 @@ function App() {
           element: <Home url={url} userRole={userRole} />,
         },
         {
-          path: "/SunsetSunriseTable",
-          element: <SunsetSunriseTable url={url} />,
-        },
-        {
           path: "/CityTable",
-          element: <CityTable url={url} />,
+          element: <CityTable url={url} userRole={userRole} />,
         },
         {
           path: "/Register",
