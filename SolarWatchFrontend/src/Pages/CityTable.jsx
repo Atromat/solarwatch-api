@@ -13,8 +13,6 @@ function CityTable({url, userRole}) {
   const [cities, setCities] = useState(undefined);
   const [loading, setLoading] = useState(true);
   const [pickedCity, setPickedCity] = useState(undefined);
-  console.log("CityTabble lején: ");
-  console.log(pickedCity);
 
   async function fetchCities() {
     try {
@@ -44,8 +42,6 @@ function CityTable({url, userRole}) {
       state: state,
       country: country
     });
-    console.log("CityTable onClickPickben: ");
-    console.log(pickedCity);
   }
 
   useEffect(() => {
